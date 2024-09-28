@@ -80,6 +80,14 @@ State scan() {
   }
 #endif
 
+#if __EMSCRIPTEN__
+  // Register a key for simulator keyboard
+  Key k = Simulator::Keyboard::getActiveKey();
+  if (k != Key::None) {
+      state.setKey(k);
+  }
+#endif
+
   // Catch the physical keyboard events
   const uint8_t* SDLstate = SDL_GetKeyboardState(NULL);
   for (int i = 0; i < sNumberOfKeyPairs; i++) {
@@ -100,9 +108,18 @@ namespace Ion {
 namespace Simulator {
 namespace Keyboard {
 
-void keyDown(Ion::Keyboard::Key k) { Queue::sharedQueue()->push(State(k)); }
+static Ion::Keyboard::Key sActiveKey = Ion::Keyboard::Key::None;
+Ion::Keyboard::Key getActiveKey() { return sActiveKey ; }
 
-void keyUp(Ion::Keyboard::Key k) { Queue::sharedQueue()->push(State(0)); }
+void keyDown(Ion::Keyboard::Key k) { 
+    Ion::Keyboard::pushState(State(k));
+    sActiveKey = k;
+}
+
+void keyUp(Ion::Keyboard::Key k) { 
+    Queue::sharedQueue()->push(State(0));
+    sActiveKey = Ion::Keyboard::Key::None;
+}
 
 bool scanHandlesSDLKey(SDL_Scancode key) {
   for (int i = 0; i < sNumberOfKeyPairs; i++) {

@@ -8,6 +8,7 @@ namespace Ion {
 namespace Simulator {
 namespace Keyboard {
 
+Ion::Keyboard::Key getActiveKey();
 void keyDown(Ion::Keyboard::Key k);
 void keyUp(Ion::Keyboard::Key k);
 bool scanHandlesSDLKey(SDL_Scancode key);
